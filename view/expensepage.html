@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add expense</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+</head>
+
+<body>
+    <div class="premium" id="premium_account">
+        <button id="premium_button" class="premium_button">Buy Premium</button>
+    </div>
+    <div class="inputbox">
+        <label for="amount">Amount:</label>
+        <input type="number" id="amount" name="amount" class="amount" />
+        <label for="description">Description:</label>
+        <input type="text" id="description" name="description" class="description" />
+        <label for="category">Category:</label>
+        <select id="category" name="category" class="category">
+            <option>Fuel</option>
+            <option>Entertainment</option>
+            <option>Food</option>
+            <option>Utensils</option>
+            <option>Groceries</option>
+        </select>
+        <button type="submit" id="add_expense">Add expense</button>
+        <button type="submit" id="leaderboard">Show leaderboard</button>
+    </div>
+    
+    <div class="listbox">
+        <h1>Expenses</h1>
+        <ul class="listitems"></ul>
+    </div>
+    <div class="leaderboard">
+        <h3>Leader board</h3>
+        <ul id="leaderboardlist" class="leaderboardlist"></ul>
+    </div>
+</body>
+<script>
+    // async function checkstatus(){
+    //     try{
+    //     const status=await axios.get('http://localhost:3000/user/checkstatus',{withCredentials:true});
+    //     if(status.data.status=="success"){
+    //          //to change the premium account cutton to already premium acc
+    //          const premiumbar=document.getElementById("premium_account");
+    //         premiumbar.innerHTML='<h2>Premium account</h2>'
+    //     }
+    // }catch(error){
+    //     console.log("after checking status from backend came to frontend",error);
+    // }
+    // }
+
+
+    async function getoldexpense(){
+        try{
+          const old_expenses= await axios.get('http://localhost:3000/user/getexpense',{withCredentials:true})
+          old_expenses.data.forEach(old_expense=>{
+            addexpense_list(old_expense);
+          })
+        }catch (err){
+            console.log(err);
+        }
+    }
+    
+    // Call fetchExpenses when the page loads
+    window.onload = async function(){
+        // await checkstatus();
+        await getoldexpense();
+        
+    }
+
+
+    document.getElementById("add_expense").addEventListener('click',async()=>{
+        const amount=document.getElementById("amount").value;
+        const description=document.getElementById("description").value;
+        const category=document.getElementById("category").value;
+        try{
+            const response=await axios.post('http://localhost:3000/user/addexpense', { amount, description,category },{ withCredentials: true })
+            console.log(response.data);
+            addexpense_list(response.data);
+            }catch (error){
+            console.log(error);
+        }
+    })
+    function addexpense_list(expense){
+         // Create list item and button
+    const expenselist = document.createElement("li");
+    expenselist.className = "expenselists";
+    expenselist.textContent = `${expense.amount}\t\t${expense.description}\t\t${expense.category}`;
+
+
+    const deleteButton = document.createElement("button");
+    deleteButton.textContent = "Delete"; // Set button text
+    deleteButton.className = "delete-button"; // Optional class for styling or functionality
+    
+    // Append both to the list item container
+    const listItemContainer = document.createElement("div");
+    listItemContainer.className="listdiv";
+    listItemContainer.appendChild(expenselist);
+    listItemContainer.appendChild(deleteButton);
+
+    // Append to the main list
+    document.querySelector('.listitems').appendChild(listItemContainer);
+    
+    //to remove the list from ui
+    deleteButton.addEventListener('click',async()=>{
+        expenseid=await expense.id;
+        console.log(expense.id);
+        const deleteres=await axios.post('http://localhost:3000/user/deleteexpense', {del_id:expense.id,amount:expense.amount },{ withCredentials: true })
+        console.log(deleteres.data.message);
+        listItemContainer.remove();
+    })
+    }
+    // to get the premium
+    document.getElementById("premium_button").addEventListener('click',async(event)=>{
+        event.preventDefault();
+        try{
+            const response=await axios.post('http://localhost:3000/user/purchase/premium',{ withCredentials: true });
+            console.log(response.data.prefill);
+            console.log(response.data.newrazorpay_order);
+            const options = {
+                key: response.data.keyid, 
+                amount: response.data.newrazorpay_order.amount, 
+                currency: response.data.newrazorpay_order.currency,
+                name: 'YOGI',
+                description: 'Trial',
+                order_id: response.data.newrazorpay_order.id, 
+                handler: function (response) {//to handle after payment
+                    console.log(response);
+                    verify_payment(response);
+                },
+                prefill: response.data.prefill, 
+                theme: {
+                    color: '#F37254',
+                },
+            };
+            console.log(options);
+            const razorpay_checkout=new Razorpay(options);
+            razorpay_checkout.open();
+        }catch(err){
+            console.log(err);
+        }
+    })
+    
+    async function verify_payment(response){
+        console.log('after payment',response);
+        try{
+            const razorpay_verification=await axios.post('http://localhost:3000/user/verify',response,{ withCredentials: true });
+            alert (razorpay_verification.data.message);
+            if(razorpay_verification.data.message=="payment successful"){
+            //to change the premium account cutton to already premium acc
+            window.location.href = razorpay_verification.data.url;
+            }
+        }catch(err){
+            console.log('in checking the payment',err);
+        }
+    }
+
+    // to get the leaderboard
+    document.getElementById("leaderboard").addEventListener('click',async()=>{
+        try{
+            const listbox=document.querySelector(".leaderboardlist");
+            listbox.innerHTML="";
+        const list=await axios.get('http://localhost:3000/user/getleaderboard',{ withCredentials: true });
+        list.data.forEach(expense=>{
+            formleaderboard(expense)
+        })
+        }catch(err){
+            console.log('error in getting leaderboard list',err)
+        }
+    })
+    //to append the leader board in ul
+    function formleaderboard(expense){
+      const list=document.createElement("li");
+      list.className="leaderlist";
+      //it will be like 
+    //   [
+    //     {
+    //         amount:222,
+    //         description:rrrrrrr,
+    //         category:xxxx,
+    //         user:{
+    //             name:nnnnn,
+    //         }
+    //     }
+    //   ] so to get the user name we should use expense.user.name and in the backend we must add ..include:[{model:userdb,attributes:['name']}]
+      list.textContent=`${expense.id}-${expense.name}---${expense.totalspent}`;
+      const listbox=document.querySelector(".leaderboardlist");
+      listbox.appendChild(list);
+    }
+</script>
+</html>

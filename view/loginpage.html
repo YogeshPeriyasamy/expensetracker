@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="outerbox" id="outerbox">
+        <div class="mainbox">
+            <label for="email">Mail :</label>
+            <input type="email" name="mail" id="mail" required>
+            <label for="password">Password :</label>
+            <input type="text" name="password" id="password" required>
+            <button type="submit" id="loginbutton">Log in</button>
+        </div>
+        <div class="newuser">
+            <a id="newuser" href="http://localhost:3000/user/signup_page">Sign up newuser</a>
+        </div>
+        <div class="forgotpassword">
+            <a id="forgotpassword" href="#">forgotpassword?</a>
+        </div>
+    </div>
+</body>
+<script>
+    document.getElementById("loginbutton").addEventListener("click", async () => {
+        const mail = document.getElementById("mail").value;
+        const password = document.getElementById("password").value;
+        try {
+            await axios.post('http://localhost:3000/user/login', { mail, password }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }, withCredentials: true
+            })
+                .then((res) => {
+                    if (res.data.redirect) {
+                        // If the response is a redirect, navigate to the redirected URL
+                        window.location.href = res.data.url;
+                    } else {
+
+                        alert(res.data.message);
+                    }
+                })
+                .catch(err => console.log(err))
+        } catch (err) {
+            console.log(err);
+        }
+    })
+    document.getElementById("forgotpassword").addEventListener('click', () => {
+    document.getElementById("outerbox").innerHTML = `
+    <div class="forgetemailbox">
+        <form id="forgetpasswordform">
+            <label for="forgetmail">Mail :</label>
+            <input type="email" name="forgottenmail" id="forgetmail" required>
+            <button type="submit" id="forgetpassword">Send</button>
+        </form>
+    </div>
+    `;
+
+    // Now add the event listener after the HTML has been injected
+    document.getElementById("forgetpasswordform").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const mail = document.getElementById("forgetmail").value;
+        console.log("get forget mail", mail);
+        try {
+            const response = await axios.post('http://localhost:3000/user/send_forgotpassword_mail', { mail }, { withCredentials: true });
+            alert(response.data.message);
+        } catch (err) {
+            console.log('Error while sending forgot password mail', err);
+        }
+    });
+});
+
+</script>
+
+</html>

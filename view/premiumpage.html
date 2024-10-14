@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add expense</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.7.7/axios.min.js"></script>
+</head>
+
+<body>
+    <div class="premium" id="premium_account">
+        <h2>Premium account</h2>
+    </div>
+    <div class="mainbox">
+        <div class="inputbox">
+            <label for="amount">Amount:</label>
+            <input type="number" id="amount" name="amount" class="amount" />
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" class="description" />
+            <label for="category">Category:</label>
+            <select id="category" name="category" class="category">
+                <option>Fuel</option>
+                <option>Entertainment</option>
+                <option>Food</option>
+                <option>Utensils</option>
+                <option>Groceries</option>
+            </select>
+            <div class="inputboxbutton">
+                <button type="submit" id="add_expense">Add expense</button>
+                <button type="submit" id="leaderboard">Show leaderboard</button>
+                <button type="submit" id="downloadexpense">Download</button>
+            </div>
+        </div>
+
+        <div class="listbox">
+            <h3>Expenses</h3>
+            <!-- // to dynamically define the no of expense in a page -->
+            <label for="noofexpense">Expenses shown:</label>
+            <select id="noofexpense" name="noofexpense" class="noofexpense">
+                <option>5</option>
+                <option>10</option>
+
+            </select>
+            <ul class="listitems"></ul>
+            <div class="pagination"></div>
+        </div>
+        <div class="leaderboard">
+            <h3>Leader board</h3>
+            <ul id="leaderboardlist" class="leaderboardlist"></ul>
+        </div>
+    </div>
+    <div class="reportbox">
+        <label for="report">Report:</label>
+        <select id="report" name="report" class="report">
+            <option>daily</option>
+            <option>monthly</option>
+            <option>yearly</option>
+        </select>
+        <button type="submit" id="reportbutton">Get report</button>
+    </div>
+</body>
+<script>
+    let current_page = 1;//by default at first
+    async function getoldexpense() {
+        try {
+            document.querySelector('.listitems').innerHTML = "";//remove the current page expenses to show other page 
+            const noof_expense = document.getElementById("noofexpense").value;
+
+            //here the query should be seperated using & not , ?pageno=${current_page}&limit=${noof_expense}
+            const old_expenses = await axios.get(`http://localhost:3000/user/getexpense?pageno=${current_page}&limit=${noof_expense}`, { withCredentials: true })
+            pagerendering(old_expenses.data.totalpages);
+            old_expenses.data.expenses.forEach(old_expense => {
+                addexpense_list(old_expense);
+
+            })
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+
+    // Event listener for changes in the number of expenses dropdown
+    document.getElementById("noofexpense").addEventListener('change', async () => {
+        current_page = 1; // Reset to the first page when changing the limit
+        await getoldexpense(); // Fetch expenses with the new limit
+    });
+
+
+    // Call fetchExpenses when the page loads
+    window.onload = async function () {
+        // await checkstatus();
+        await getoldexpense();
+
+    }
+
+
+    document.getElementById("add_expense").addEventListener('click', async () => {
+        const amount = document.getElementById("amount").value;
+        const description = document.getElementById("description").value;
+        const category = document.getElementById("category").value;
+        try {
+            const response = await axios.post('http://localhost:3000/user/addexpense', { amount, description, category }, { withCredentials: true })
+            console.log(response.data);
+            getoldexpense();
+        } catch (error) {
+            console.log(error);
+        }
+    })
+
+    // render the pages as per total no of expenses
+
+    function pagerendering(totalpages) {
+        let pagediv = document.querySelector('.pagination')
+        pagediv.innerHTML = "";
+        for (let i = 1; i <= totalpages; i++) {
+            let page = document.createElement("button");
+            page.textContent = i;
+            page.disabled = i === current_page;//disable the current page
+            page.addEventListener('click', () => {
+                current_page = i;
+                getoldexpense();
+            })
+            pagediv.appendChild(page);
+        }
+
+    }
+    function addexpense_list(expense) {
+        // Create list item and button
+        const expenselist = document.createElement("li");
+        expenselist.className = "expenselists";
+        expenselist.textContent = `${expense.amount}\t\t${expense.description}\t\t${expense.category}`;
+
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Delete"; // Set button text
+        deleteButton.className = "delete-button"; // Optional class for styling or functionality
+
+        // Append both to the list item container
+        const listItemContainer = document.createElement("div");
+        listItemContainer.className = "listdiv";
+        listItemContainer.appendChild(expenselist);
+        listItemContainer.appendChild(deleteButton);
+
+        // Append to the main list
+        document.querySelector('.listitems').appendChild(listItemContainer);
+
+        //to remove the list from ui
+        deleteButton.addEventListener('click', async () => {
+            expenseid = await expense.id;
+            console.log(expense.id);
+            const deleteres = await axios.post('http://localhost:3000/user/deleteexpense', { del_id: expense.id, amount: expense.amount }, { withCredentials: true })
+            console.log(deleteres.data.message);
+            listItemContainer.remove();
+        })
+    }
+    // to get the leaderboard
+    document.getElementById("leaderboard").addEventListener('click', async () => {
+        try {
+            const listbox = document.querySelector(".leaderboardlist");
+            listbox.innerHTML = "";
+            const list = await axios.get('http://localhost:3000/user/getleaderboard', { withCredentials: true });
+            list.data.forEach(expense => {
+                formleaderboard(expense)
+            })
+        } catch (err) {
+            console.log('error in getting leaderboard list', err)
+        }
+    })
+    //to append the leader board in ul
+    function formleaderboard(expense) {
+        const list = document.createElement("li");
+        list.className = "leaderlist";
+        //it will be like when we use include
+        //   [
+        //     {
+        //         amount:222,
+        //         description:rrrrrrr,
+        //         category:xxxx,
+        //         user:{
+        //             name:nnnnn,
+        //         }
+        //     }
+        //   ] so to get the user name we should use expense.user.name and in the backend we must add ..include:[{model:userdb,attributes:['name']}]
+        list.textContent = `${expense.id}-${expense.name}---${expense.totalspent}`;
+        const listbox = document.querySelector(".leaderboardlist");
+        listbox.appendChild(list);
+    }
+    //to get the reports generated
+    document.getElementById("reportbutton").addEventListener('click', async () => {
+
+        const reporttype = document.getElementById("report").value;
+        console.log(reporttype);
+        try {
+            const reports = await axios.get(`http://localhost:3000/user/getreports?type=${reporttype}`, { withCredentials: true });
+            // Clear the previous report if any
+            const reportBox = document.querySelector(".reportbox");
+            reportBox.innerHTML = `
+          <label for="report">Report:</label>
+          <select id="report" name="report" class="report">
+              <option>daily</option>
+              <option>monthly</option>
+              <option>yearly</option>
+          </select>
+          <button type="submit" id="reportbutton">Get report</button>
+        `;
+            //create the table
+            const table = document.createElement('table');
+            const header = table.insertRow();
+            header.insertCell().textContent = "Date";
+            header.insertCell().textContent = "Category";
+            header.insertCell().textContent = "Total spent";
+            //now add the records
+            reports.data.forEach(report => {
+                const row = table.insertRow();
+                row.insertCell().textContent = report.Date;
+                row.insertCell().textContent = report.category;
+                row.insertCell().textContent = report.totalspent;
+            })
+            reportBox.appendChild(table);
+        } catch (err) {
+            console.log("front end report creation", err);
+        }
+
+    })
+    //add download expense frontend
+    document.getElementById("downloadexpense").addEventListener('click', async () => {
+        try {
+            const downloads = await axios.get(`http://localhost:3000/user/downloadexpense`, { withCredentials: true });
+            if (downloads.data.message == "success") {
+                const link = document.createElement('a');
+                link.href = downloads.data.url;
+                link.download = 'expenses.txt'; //optional by which name we like to download it
+                link.click(); // Trigger the download
+            }
+        } catch (err) {
+            console.log('in frontend download expense', err)
+        }
+    })
+</script>
+
+</html>
