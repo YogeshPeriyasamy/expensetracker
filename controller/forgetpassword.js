@@ -33,7 +33,7 @@ exports.sendforgetmail = async (req, res) => {
           <body>
             <h1>Change password</h1>
             <p>You have forgotten your login password. Please reset it.</p>
-            <a href='http://localhost:3000/user/resetpassword/${uniqueid}'>reset password</a>
+            <a href='http://13.60.229.113:3000/user/resetpassword/${uniqueid}'>reset password</a>
           </body>
         `,
       },

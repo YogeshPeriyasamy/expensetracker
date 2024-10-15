@@ -43,7 +43,7 @@
 <script>
     // async function checkstatus(){
     //     try{
-    //     const status=await axios.get('http://localhost:3000/user/checkstatus',{withCredentials:true});
+    //     const status=await axios.get('http://13.60.229.113:3000/user/checkstatus',{withCredentials:true});
     //     if(status.data.status=="success"){
     //          //to change the premium account cutton to already premium acc
     //          const premiumbar=document.getElementById("premium_account");
@@ -57,7 +57,7 @@
 
     async function getoldexpense(){
         try{
-          const old_expenses= await axios.get('http://localhost:3000/user/getexpense',{withCredentials:true})
+          const old_expenses= await axios.get('http://13.60.229.113:3000/user/getexpense',{withCredentials:true})
           old_expenses.data.forEach(old_expense=>{
             addexpense_list(old_expense);
           })
@@ -79,7 +79,7 @@
         const description=document.getElementById("description").value;
         const category=document.getElementById("category").value;
         try{
-            const response=await axios.post('http://localhost:3000/user/addexpense', { amount, description,category },{ withCredentials: true })
+            const response=await axios.post('http://13.60.229.113:3000/user/addexpense', { amount, description,category },{ withCredentials: true })
             console.log(response.data);
             addexpense_list(response.data);
             }catch (error){
@@ -110,7 +110,7 @@
     deleteButton.addEventListener('click',async()=>{
         expenseid=await expense.id;
         console.log(expense.id);
-        const deleteres=await axios.post('http://localhost:3000/user/deleteexpense', {del_id:expense.id,amount:expense.amount },{ withCredentials: true })
+        const deleteres=await axios.post('http://13.60.229.113:3000/user/deleteexpense', {del_id:expense.id,amount:expense.amount },{ withCredentials: true })
         console.log(deleteres.data.message);
         listItemContainer.remove();
     })
@@ -119,7 +119,7 @@
     document.getElementById("premium_button").addEventListener('click',async(event)=>{
         event.preventDefault();
         try{
-            const response=await axios.post('http://localhost:3000/user/purchase/premium',{ withCredentials: true });
+            const response=await axios.post('http://13.60.229.113:3000/user/purchase/premium',{ withCredentials: true });
             console.log(response.data.prefill);
             console.log(response.data.newrazorpay_order);
             const options = {
@@ -149,7 +149,7 @@
     async function verify_payment(response){
         console.log('after payment',response);
         try{
-            const razorpay_verification=await axios.post('http://localhost:3000/user/verify',response,{ withCredentials: true });
+            const razorpay_verification=await axios.post('http://13.60.229.113:3000/user/verify',response,{ withCredentials: true });
             alert (razorpay_verification.data.message);
             if(razorpay_verification.data.message=="payment successful"){
             //to change the premium account cutton to already premium acc
@@ -165,7 +165,7 @@
         try{
             const listbox=document.querySelector(".leaderboardlist");
             listbox.innerHTML="";
-        const list=await axios.get('http://localhost:3000/user/getleaderboard',{ withCredentials: true });
+        const list=await axios.get('http://13.60.229.113:3000/user/getleaderboard',{ withCredentials: true });
         list.data.forEach(expense=>{
             formleaderboard(expense)
         })

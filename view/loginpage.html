@@ -19,7 +19,7 @@
             <button type="submit" id="loginbutton">Log in</button>
         </div>
         <div class="newuser">
-            <a id="newuser" href="http://localhost:3000/user/signup_page">Sign up newuser</a>
+            <a id="newuser" href="http://13.60.229.113:3000/user/signup_page">Sign up newuser</a>
         </div>
         <div class="forgotpassword">
             <a id="forgotpassword" href="#">forgotpassword?</a>
@@ -31,7 +31,7 @@
         const mail = document.getElementById("mail").value;
         const password = document.getElementById("password").value;
         try {
-            await axios.post('http://localhost:3000/user/login', { mail, password }, {
+            await axios.post('http://13.60.229.113:3000/user/login', { mail, password }, {
                 headers: {
                     'Content-Type': 'application/json'
                 }, withCredentials: true
@@ -67,7 +67,7 @@
         const mail = document.getElementById("forgetmail").value;
         console.log("get forget mail", mail);
         try {
-            const response = await axios.post('http://localhost:3000/user/send_forgotpassword_mail', { mail }, { withCredentials: true });
+            const response = await axios.post('http://13.60.229.113:3000/user/send_forgotpassword_mail', { mail }, { withCredentials: true });
             alert(response.data.message);
         } catch (err) {
             console.log('Error while sending forgot password mail', err);

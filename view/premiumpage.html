@@ -68,7 +68,7 @@
             const noof_expense = document.getElementById("noofexpense").value;
 
             //here the query should be seperated using & not , ?pageno=${current_page}&limit=${noof_expense}
-            const old_expenses = await axios.get(`http://localhost:3000/user/getexpense?pageno=${current_page}&limit=${noof_expense}`, { withCredentials: true })
+            const old_expenses = await axios.get(`http://13.60.229.113:3000/user/getexpense?pageno=${current_page}&limit=${noof_expense}`, { withCredentials: true })
             pagerendering(old_expenses.data.totalpages);
             old_expenses.data.expenses.forEach(old_expense => {
                 addexpense_list(old_expense);
@@ -100,7 +100,7 @@
         const description = document.getElementById("description").value;
         const category = document.getElementById("category").value;
         try {
-            const response = await axios.post('http://localhost:3000/user/addexpense', { amount, description, category }, { withCredentials: true })
+            const response = await axios.post('http://13.60.229.113:3000/user/addexpense', { amount, description, category }, { withCredentials: true })
             console.log(response.data);
             getoldexpense();
         } catch (error) {
@@ -149,7 +149,7 @@
         deleteButton.addEventListener('click', async () => {
             expenseid = await expense.id;
             console.log(expense.id);
-            const deleteres = await axios.post('http://localhost:3000/user/deleteexpense', { del_id: expense.id, amount: expense.amount }, { withCredentials: true })
+            const deleteres = await axios.post('http://13.60.229.113:3000/user/deleteexpense', { del_id: expense.id, amount: expense.amount }, { withCredentials: true })
             console.log(deleteres.data.message);
             listItemContainer.remove();
         })
@@ -159,7 +159,7 @@
         try {
             const listbox = document.querySelector(".leaderboardlist");
             listbox.innerHTML = "";
-            const list = await axios.get('http://localhost:3000/user/getleaderboard', { withCredentials: true });
+            const list = await axios.get('http://13.60.229.113:3000/user/getleaderboard', { withCredentials: true });
             list.data.forEach(expense => {
                 formleaderboard(expense)
             })
@@ -192,7 +192,7 @@
         const reporttype = document.getElementById("report").value;
         console.log(reporttype);
         try {
-            const reports = await axios.get(`http://localhost:3000/user/getreports?type=${reporttype}`, { withCredentials: true });
+            const reports = await axios.get(`http://13.60.229.113:3000/user/getreports?type=${reporttype}`, { withCredentials: true });
             // Clear the previous report if any
             const reportBox = document.querySelector(".reportbox");
             reportBox.innerHTML = `
@@ -226,7 +226,7 @@
     //add download expense frontend
     document.getElementById("downloadexpense").addEventListener('click', async () => {
         try {
-            const downloads = await axios.get(`http://localhost:3000/user/downloadexpense`, { withCredentials: true });
+            const downloads = await axios.get(`http://13.60.229.113:3000/user/downloadexpense`, { withCredentials: true });
             if (downloads.data.message == "success") {
                 const link = document.createElement('a');
                 link.href = downloads.data.url;

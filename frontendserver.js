@@ -23,5 +23,5 @@ const server = http.createServer((req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Frontend server running on http://localhost:${PORT}`);
+    console.log(`Frontend server running on http://13.60.229.113:${PORT}`);
 });

@@ -69,7 +69,7 @@ exports.verify_payment=async(req,res)=>{
                 const user=await user_db.findByPk(req.session.userId);
                 user.ispremium=true;
                 await user.save();
-                return res.json({message:"payment successful", redirect: true, url: 'http://localhost:3000/user/openpremiumexpense' });
+                return res.json({message:"payment successful", redirect: true, url: 'http://13.60.229.113:3000/user/openpremiumexpense' });
             }
             else{
                 res.json({message:"order not found"}); 

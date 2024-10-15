@@ -27,7 +27,7 @@ app.use(session({
 
 // Use CORS middleware
 app.use(cors({
-    origin: 'http://localhost:3001', // Frontend origin
+    origin: 'http://13.60.229.113:3001', // Frontend origin
     credentials: true 
 }));
 app.use(express.urlencoded({ extended: false }));

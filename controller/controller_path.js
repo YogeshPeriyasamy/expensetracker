@@ -32,7 +32,7 @@ exports.add_requser = async (req, res) => {
                         totalspent:0,
 
                     })
-                res.redirect(302,'http://localhost:3001/user/loginpage');
+                res.redirect(302,'http://13.60.229.113:3001/user/loginpage');
                 }
                 else {
                     // Send response and stop further execution if user is already registered
@@ -87,10 +87,10 @@ exports.login_details = async (req, res) => {
                         //check whether its already premium
                         const premiumstatus=await user.ispremium;
                         if(premiumstatus==true){
-                            return res.json({ redirect: true, url: 'http://localhost:3000/user/openpremiumexpense' });
+                            return res.json({ redirect: true, url: 'http://13.60.229.113:3000/user/openpremiumexpense' });
                         }
                         else{
-                        return res.json({ redirect: true, url: 'http://localhost:3000/user/openexpense' });
+                        return res.json({ redirect: true, url: 'http://13.60.229.113:3000/user/openexpense' });
                         }
                     }
                     else {
